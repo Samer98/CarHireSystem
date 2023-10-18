@@ -1,5 +1,52 @@
 # Car Hire Management System 🚀
 
+The SQL statements you provided are used to create tables for a car rental management system (ERD).
+
+    Customers:
+        customer_id (Primary Key): A unique identifier for each customer.
+        first_name: The first name of the customer.
+        last_name: The last name of the customer.
+        email (Unique): The email address of the customer, which is set as unique to ensure each email is associated with only one customer.
+        phone_number: The phone number of the customer.
+
+    Vehicles_type:
+        type_id (Primary Key): A unique identifier for each vehicle type.
+        type_name: The name of the vehicle type (e.g., "small," "family," "vans").
+        capacity: The capacity or maximum number of passengers for this type of vehicle.
+
+    Vehicles:
+        vehicle_id (Primary Key): A unique identifier for each vehicle.
+        type_id (Foreign Key): References the type_id in the Vehicles_type table, specifying the type of the vehicle.
+        car_name: The name or description of the vehicle.
+        availability: A boolean indicating whether the vehicle is available (true) or not (false).
+
+    Bookings:
+        booking_id (Primary Key): A unique identifier for each booking.
+        customer_id (Foreign Key): References the customer_id in the Customers table, indicating the customer associated with the booking.
+        vehicle_id (Foreign Key): References the vehicle_id in the Vehicles table, specifying the vehicle booked.
+        booking_date: The date of the booking.
+        confirmation_letter_sent: A boolean indicating whether a confirmation letter has been sent for this booking (true/false).
+
+    Invoices:
+        invoice_id (Primary Key): A unique identifier for each invoice.
+        booking_id (Foreign Key): References the booking_id in the Bookings table, indicating the booking associated with this invoice.
+        invoice_date: The date the invoice was generated.
+        total_amount: The total amount due for this invoice.
+
+
+Entity-Relationship Diagram (ERD) Explanation:
+The ERD represents the relationships between the different tables in your database. Here's a high-level explanation of these relationships:
+
+    Customers can make multiple bookings (one-to-many relationship).
+    Vehicles are associated with a specific vehicle type.
+    Bookings link customers to specific vehicles.
+    Invoices are associated with bookings, indicating the financial transaction for each booking.
+
+
+This database design allows you to manage customers, vehicles, bookings, and financial transactions efficiently for a car rental system. The relationships between tables are defined by foreign keys, ensuring data integrity and consistency in the database.
+
+![Car Image](erd diiagram.PNG)
+
 This is a simple Flask-based application for managing a car rental system. It allows you to perform basic operations such as adding, updating, deleting, and retrieving customer information from a MySQL database.
 
 ## Prerequisites 🚀
@@ -77,4 +124,6 @@ Delete a customer by providing a valid customer_id:
     Method: DELETE
     URL: /delete_customer/<int:customer_id>
     Response: Success message
+
+
 
