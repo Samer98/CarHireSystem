@@ -1,26 +1,34 @@
 from flask import Flask, request, jsonify, make_response, Response
 import mysql.connector
 # from flask_mysqldb import MySQL
+from decouple import config
+
+from database import DataBaseQueries
 
 app = Flask(__name__)
+
+db_host = config('DB_HOST')
+db_user = config('DB_USER')
+db_password = config('DB_PASSWORD')
+db_name = config('DB_NAME')
+
+# Create a database connection
 db = mysql.connector.connect(
-    host="localhost",
-    user="root1",
-    password="rootroot12345",
-    database="carhire"
+    host=db_host,
+    user=db_user,
+    password=db_password,
+    database=db_name
 )
 
+db_queries = DataBaseQueries(db)
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     data = request.get_json()
-    cursor = db.cursor()
     try:
-        insert_query = "INSERT INTO Customers (first_name, last_name, email, phone_number) VALUES (%s, %s, %s, %s)"
-        cursor.execute(insert_query, (data['first_name'], data['last_name'], data['email'], data['phone_number']))
-        db.commit()
-        return jsonify({'message': 'Customer added successfully'})
+        db_queries.insert_customer(data)
+        return jsonify({'message': 'Customer added successfully',"data":data})
     except Exception as error:
-        error_message = {'message': str(error)}
+        error_message = {'message': str(error),"data":[]}
         response = make_response(jsonify(error_message), 400)  # 400 Bad Request status code
         return response
 
@@ -28,61 +36,41 @@ def add_customer():
 @app.route('/update_customer/<int:customer_id>', methods=['PUT'])
 def update_customer(customer_id):
     data = request.get_json()
-    cursor = db.cursor()
-    update_query = "UPDATE Customers SET first_name = %s, last_name = %s, email = %s, phone_number = %s WHERE customer_id = %s"
-    cursor.execute(update_query, (data['first_name'], data['last_name'], data['email'], data['phone_number'], customer_id))
-    db.commit()
-    if cursor.rowcount > 0:
+    db_queries.update_customer(data,customer_id)
+    if db_queries.cursor.rowcount > 0:
         # Fetch the updated customer data
-        cursor.execute("SELECT * FROM Customers WHERE customer_id = %s", (customer_id,))
-        updated_customer = cursor.fetchone()
-        if updated_customer:
-            customer_data = {
-                'customer_id': updated_customer[0],
-                'first_name': updated_customer[1],
-                'last_name': updated_customer[2],
-                'email': updated_customer[3],
-                'phone_number': updated_customer[4]
-            }
-            return jsonify({'message': 'Customer updated successfully', 'customer': customer_data})
+        customer = db_queries.get_customer(customer_id)
+        customer = db_queries.cursor.fetchone()
+        if customer:
+            updated_customer =db_queries.customer_info(customer)
+
+            return jsonify({'message': 'Customer updated successfully', 'data': updated_customer})
         else:
-            return jsonify({'message': 'Failed to fetch updated customer data'})
+            return make_response(jsonify({'message': 'Failed to fetch updated customer data',"data":[]}), 400)
     else:
-        return jsonify({'message': 'no changes made'})
+        return make_response(jsonify({'message': 'No changes made',"data":[]}), 204)
 
 
 @app.route('/delete_customer/<int:customer_id>', methods=['DELETE'])
 def delete_customer(customer_id):
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM Customers WHERE customer_id = %s", (customer_id,))
-    existing_customer = cursor.fetchone()
-    print(existing_customer)
+    db_queries.get_customer(customer_id)
+    existing_customer = db_queries.cursor.fetchone()
     if existing_customer:
         # If the customer exists, delete them
-        delete_query = "DELETE FROM Customers WHERE customer_id = %s"
-        cursor.execute(delete_query, (customer_id,))
-        db.commit()
-        return jsonify({'message': 'Customer deleted successfully'})
+        db_queries.delete_customer(customer_id)
+        return jsonify({'message': 'Customer deleted successfully','data':[]})
     else:
         # If the customer does not exist, provide an appropriate response
-        return jsonify({'message': 'Customer not found'})
+        return make_response(jsonify({'message': 'Customer not found',"data":[]}), 400)
 
 @app.route('/get_customer/<int:customer_id>', methods=['GET'])
 def get_customer(customer_id):
-    cursor = db.cursor()
-    select_query = "SELECT customer_id, first_name, last_name, email, phone_number FROM Customers WHERE customer_id = %s"
-    cursor.execute(select_query, (customer_id,))
-    result = cursor.fetchone()
-    if result:
-        customer_data = {
-            'customer_id': result[0],
-            'first_name': result[1],
-            'last_name': result[2],
-            'email': result[3],
-            'phone_number': result[4]
-        }
-        return jsonify(customer_data)
-    return jsonify({'message': 'Customer not found'})
+    db_queries.get_customer(customer_id)
+    customer = db_queries.cursor.fetchone()
+    if customer:
+        customer_data= db_queries.customer_info(customer)
+        return jsonify({"data":customer_data})
+    return make_response(jsonify({'message': 'Customer not found',"data":[]}), 400)
 
 if __name__ == '__main':
     app.run(host='0.0.0.0',port=5000,debug=True)
