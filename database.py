@@ -1,5 +1,3 @@
-import mysql.connector
-
 class DataBaseQueries:
 
     def __init__(self, connection):
