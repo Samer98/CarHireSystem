@@ -45,7 +45,7 @@ The ERD represents the relationships between the different tables in your databa
 
 This database design allows you to manage customers, vehicles, bookings, and financial transactions efficiently for a car rental system. The relationships between tables are defined by foreign keys, ensuring data integrity and consistency in the database.
 
-![Car Image](erd diiagram.PNG)
+![ERD Image](erd_diiagram.PNG)
 
 This is a simple Flask-based application for managing a car rental system. It allows you to perform basic operations such as adding, updating, deleting, and retrieving customer information from a MySQL database.
 
