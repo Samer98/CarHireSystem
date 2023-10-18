@@ -15,6 +15,15 @@ db = mysql.connector.connect(
 )
 
 db_queries = DataBaseQueries(db)
+
+@app.route('/get_customer/<int:customer_id>', methods=['GET'])
+def get_customer(customer_id):
+    db_queries.get_customer(customer_id)
+    customer = db_queries.cursor.fetchone()
+    if customer:
+        customer_data= db_queries.customer_info(customer)
+        return jsonify({'message': 'Customer got successfully',"data":customer_data})
+    return make_response(jsonify({'message': 'Customer not found',"data":[]}), 400)
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     data = request.get_json()
@@ -54,14 +63,7 @@ def delete_customer(customer_id):
     else:
         return make_response(jsonify({'message': 'Customer not found',"data":[]}), 400)
 
-@app.route('/get_customer/<int:customer_id>', methods=['GET'])
-def get_customer(customer_id):
-    db_queries.get_customer(customer_id)
-    customer = db_queries.cursor.fetchone()
-    if customer:
-        customer_data= db_queries.customer_info(customer)
-        return jsonify({'message': 'Customer got successfully',"data":customer_data})
-    return make_response(jsonify({'message': 'Customer not found',"data":[]}), 400)
+
 
 if __name__ == '__main':
     app.run(host='0.0.0.0',port=5000,debug=True)
