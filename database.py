@@ -9,7 +9,6 @@ class DataBaseQueries:
         insert_query = "INSERT INTO Customers (first_name, last_name, email, phone_number) VALUES (%s, %s, %s, %s)"
         cursor.execute(insert_query, (data['first_name'], data['last_name'], data['email'], data['phone_number']))
         self.connection.commit()
-        cursor.close()
 
     def update_customer(self,data,customer_id):
         cursor = self.cursor

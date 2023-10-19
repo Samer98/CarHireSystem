@@ -32,7 +32,7 @@ def add_customer():
         return jsonify({'message': 'Customer added successfully',"data":data})
     except Exception as error:
         error_message = {'message': str(error),"data":[]}
-        response = make_response(jsonify(error_message), 400)  #
+        response = make_response(jsonify(error_message), 400)
         return response
 
 
@@ -50,7 +50,8 @@ def update_customer(customer_id):
         else:
             return make_response(jsonify({'message': 'Failed to fetch updated customer data',"data":[]}), 400)
     else:
-        return make_response(jsonify({'message': 'No changes made',"data":[]}), 204)
+        response = {'message': 'No changes made', 'data': []}
+        return make_response(jsonify(response), 204)
 
 
 @app.route('/delete_customer/<int:customer_id>', methods=['DELETE'])
